@@ -1,0 +1,66 @@
+{
+    "nodes": [
+        {
+            "id": "FastAPI",
+            "content": {
+                "progress_percentage": 20
+            }
+        },
+        {
+            "id": "",
+            "content": {
+                "progress_percentage": 20
+            }
+        },
+        {
+            "id": "Python",
+            "content": {
+                "progress_percentage": 60
+            }
+        },
+        {
+            "id": "NumPy",
+            "content": {
+                "progress_percentage": 90
+            }
+        },
+        {
+            "id": "matplotlib",
+            "content": {
+                "progress_percentage": 90
+            }
+        },
+        {
+            "id": "networkx",
+            "content": {
+                "progress_percentage": 78
+            }
+        }
+    ],
+    "edges": [
+        {
+            "from": "FastAPI",
+            "to": "Python"
+        },
+        {
+            "from": "FastAPI",
+            "to": "lpv-3D"
+        },
+        {
+            "from": "Python",
+            "to": "lpv-3D"
+        },
+        {
+            "from": "Python",
+            "to": "NumPy"
+        },
+        {
+            "from": "Python",
+            "to": "matplotlib"
+        },
+        {
+            "from": "Python",
+            "to": "networkx"
+        }
+    ]
+}

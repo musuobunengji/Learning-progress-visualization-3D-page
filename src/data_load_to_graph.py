@@ -1,6 +1,3 @@
-import networkx as nx
-
-
 def validate_node(node_data):
     """
     validate: the id of one node exists and the progress_percentage for

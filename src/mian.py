@@ -21,6 +21,8 @@ for edge in edges:
     if validate_edge(edge_data=edge, nodes=nodes):
         G.add_edge(edge["from"], edge["to"])
 # 画图
+print(f"nodes:{list(G.nodes)}")
+print(list(G.edges))
 pos = nx.spring_layout(G)
 nx.draw(G, pos, with_labels=True, node_size=1200)
 plt.show()
