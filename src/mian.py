@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from json_helper_load import load_nodes, load_edges
 from validate_data import validate_node, validate_edge
 from normalize_progress import normalize_progress
+from draw_graph import draw_graph
 
 G = nx.Graph()
 
@@ -24,13 +25,4 @@ for edge in edges:
         G.add_edge(edge["from"], edge["to"])
 
 # 画图
-pos = nx.spring_layout(G)
-nx.draw(
-    G,
-    pos,
-    node_color=progress_percents,
-    cmap=plt.cm.Blues,
-    with_labels=True,
-    node_size=1200,
-)
-plt.show()
+draw_graph(G, pos=nx.spring_layout(G), progress_percents=progress_percents)
