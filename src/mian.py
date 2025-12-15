@@ -25,4 +25,4 @@ for edge in edges:
         G.add_edge(edge["from"], edge["to"])
 
 # 画图
-draw_graph(G, pos=nx.spring_layout(G), progress_percents=progress_percents)
+draw_graph(G, progress_percents=progress_percents)
