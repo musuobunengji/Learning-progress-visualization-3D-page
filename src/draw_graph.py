@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 
-def draw_graph(G, progress_percents):
+def draw_graph(G, pos, progress_percents):
     """drawing logic"""
     fig, ax = plt.subplots()
+    ax.set_aspect("equal")
 
-    pos = nx.spring_layout(G)
     nx.draw(
         G,
         pos,

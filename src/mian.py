@@ -5,6 +5,7 @@ from json_helper_load import load_nodes, load_edges
 from validate_data import validate_node, validate_edge
 from normalize_progress import normalize_progress
 from draw_graph import draw_graph
+from compute_layout import compute_layout
 
 G = nx.Graph()
 
@@ -25,4 +26,5 @@ for edge in edges:
         G.add_edge(edge["from"], edge["to"])
 
 # 画图
-draw_graph(G, progress_percents=progress_percents)
+pos = compute_layout(G)
+draw_graph(G, pos=pos, progress_percents=progress_percents)
