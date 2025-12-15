@@ -1,6 +1,6 @@
 import networkx as nx
 from pathlib import Path
-from src.data_load_to_graph import validate_node
+from src.validate_data import validate_node
 from src.json_helper_load import load_nodes
 
 BASE_DIR = Path(__file__).parent
