@@ -1,22 +1,37 @@
 import networkx as nx
 from pathlib import Path
-
+import argparse
 from src.graph_pipeline import build_graph, draw_graph, compute_layout
+from src.graph_pipeline import ValidationError
+import traceback
 
-G = nx.Graph()
 
-while True:
-    aaa = input("Default visualization:(Y/N): ")
-    if aaa == "Y":
-        progress_percents = build_graph(G)
-        break
-    elif aaa == "N":
-        json_path = input("input the json path you want to visualize: ")
-        path = Path(json_path)
-        progress_percents = build_graph(G, path)
-        break
+def main():
+    parser = argparse.ArgumentParser(description="Graph visualization tool")
+    parser.add_argument(
+        "--input",
+        type=Path,
+        help="Path to input JSON file(default:data.json)",
+    )
+    args = parser.parse_args()
+
+    G = nx.Graph()
+
+    try:
+        if args.input:
+            progress_percents = build_graph(G, args.input)
+        else:
+            progress_percents = build_graph(G)
+    except FileNotFoundError:
+        print("Please enter vaild path!")
+    except ValidationError as e:
+        print(f"[Validation Error] {e}")
+    except Exception:
+        traceback.print_exc()
     else:
-        continue
+        pos = compute_layout(G)
+        draw_graph(G=G, pos=pos, progress_percents=progress_percents)
 
-pos = compute_layout(G)
-draw_graph(G=G, pos=pos, progress_percents=progress_percents)
+
+if __name__ == "__main__":
+    main()

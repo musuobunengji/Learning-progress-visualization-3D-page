@@ -22,6 +22,10 @@ BASE_DIR = Path(__file__).parent
 DEFAULT_DATA_PATH = BASE_DIR / "data.json"
 
 
+class ValidationError(Exception):
+    """Raised when input data fails validation"""
+
+
 def build_graph(G, path: Path = DEFAULT_DATA_PATH):
     nodes = load_nodes(path)
     edges = load_edges(path)
@@ -33,44 +37,57 @@ def build_graph(G, path: Path = DEFAULT_DATA_PATH):
             progress_percent = node["content"]["progress_percentage"]
             progress_percents.append(normalize_progress(progress_percent))
             G.add_node(node["id"], progress_percent=progress_percent)
-        else:
-            print(node)
 
     # add edges
+    node_ids = {node["id"] for node in nodes}
     for edge in edges:
-        if validate_edge(edge_data=edge, nodes=nodes):
+        if validate_edge(edge_data=edge, node_ids=node_ids):
             G.add_edge(edge["from"], edge["to"])
-        else:
-            print(edge)
 
     return progress_percents
 
 
 def validate_node(node_data):
-    """
-    validate: the id of one node exists and the progress_percentage for
-      content in one node exists;
-      return True/False
-    """
-    if (
-        node_data["id"] is not None
-        and node_data["content"]["progress_percentage"] is not None
-    ):
-        return True
-    else:
-        return False
+    """ """
+    # 1. Check ID
+    if node_data.get("id") == "":
+        raise ValidationError("NodeIdIsEmpty")
+    elif node_data.get("id") is None:
+        raise ValidationError("NodeIdIsNone")
+
+    # 2. Get the percentage value safely
+    percentage_raw = node_data.get("content", {}).get("progress_percentage")
+
+    # 3. Check if empty
+    if percentage_raw == "":
+        raise ValidationError("NodeProgressPercentageIsEmpty")
+
+    # 4. Attempt to validate if it is a number
+    # Add range checks (e.g., must be 0-100)
+    if not (0 <= float(percentage_raw) <= 100):
+        raise ValidationError("NodeProgressPercentageOutOfRange")
+    try:
+        # float() handles both integers like "10" and floats like "10.5"
+        # It also catches non-numeric strings like "abc"
+        numeric_value = float(percentage_raw)
+    except (ValidationError, TypeError):
+        # Triggered if it's not a number (e.g. "abc") or is None
+        raise ValidationError("NodeProgressPercentageIsNotANumber")
+
+    # All checks passed
+    return True
 
 
-def validate_edge(edge_data, nodes):
+def validate_edge(edge_data, node_ids):
     """
     validate: the from and to for the edge must in note;
-    return True/False
     """
-    node_ids = {node["id"] for node in nodes}
-    if edge_data["from"] in node_ids and edge_data["to"] in node_ids:
-        return True
+    if edge_data.get("from") not in node_ids:
+        raise ValidationError("EdgeFromNotValue")
+    elif edge_data.get("to") not in node_ids:
+        raise ValidationError("EdgeToNotValue")
     else:
-        return False
+        return True
 
 
 def compute_layout(G):
