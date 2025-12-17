@@ -64,15 +64,16 @@ def validate_node(node_data):
 
     # 4. Attempt to validate if it is a number
     # Add range checks (e.g., must be 0-100)
-    if not (0 <= float(percentage_raw) <= 100):
-        raise ValidationError("NodeProgressPercentageOutOfRange")
     try:
         # float() handles both integers like "10" and floats like "10.5"
         # It also catches non-numeric strings like "abc"
         numeric_value = float(percentage_raw)
-    except (ValidationError, TypeError):
+    except TypeError:
         # Triggered if it's not a number (e.g. "abc") or is None
         raise ValidationError("NodeProgressPercentageIsNotANumber")
+    else:
+        if not (0 <= numeric_value <= 100):
+            raise ValidationError("NodeProgressPercentageOutOfRange")
 
     # All checks passed
     return True
