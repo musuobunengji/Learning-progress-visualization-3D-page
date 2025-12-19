@@ -1,0 +1,191 @@
+PART 1 FOUNDATIONAL SPRING ......................................1
+1 Getting started with Spring 3
+1.1 What is Spring? 4
+1.2 Initializing a Spring application 6
+Initializing a Spring project with Spring Tool Suite 7
+Examining the Spring project structure 11
+1.3 Writing a Spring application 17
+Handling web requests 18  Defining the view 19
+Testing the controller 20  Building and running the 
+application 21  Getting to know Spring Boot DevTools 23
+Let’s review 25
+1.4 Surveying the Spring landscape 26
+The core Spring Framework 26  Spring Boot 26  Spring 
+Data 27  Spring Security 27  Spring Integration and Spring 
+Batch 27  Spring Cloud 28  Spring Native 28
+2 Developing web applications 29
+2.1 Displaying information 30
+Establishing the domain 31  Creating a controller class 34
+Designing the view 38
+2.2 Processing form submission 41
+2.3 Validating form input 49
+Declaring validation rules 50  Performing validation at 
+form binding 52  Displaying validation errors 54
+2.4 Working with view controllers 54
+2.5 Choosing a view template library 57
+Caching templates 59
+3 Working with data 61
+3.1 Reading and writing data with JDBC 62
+Adapting the domain for persistence 64  Working with 
+JdbcTemplate 65  Defining a schema and preloading 
+data 70  Inserting data 73
+3.2 Working with Spring Data JDBC 78
+Adding Spring Data JDBC to the build 78  Defining 
+repository interfaces 79  Annotating the domain for 
+persistence 81
+Preloading data with CommandLineRunner 83
+3.3 Persisting data with Spring Data JPA 85
+Adding Spring Data JPA to the project 85  Annotating the 
+domain as entities 86  Declaring JPA repositories 89
+Customizing repositories 90
+4 Working with nonrelational data 94
+4.1 Working with Cassandra repositories 95
+Enabling Spring Data Cassandra 95  Understanding 
+Cassandra data modeling 98  Mapping domain types 
+for Cassandra persistence 99  Writing Cassandra 
+repositories 105
+4.2 Writing MongoDB repositories 106
+Enabling Spring Data MongoDB 106  Mapping domain 
+types to documents 107  Writing MongoDB repository 
+interfaces 111
+5 Securing Spring 113
+5.1 Enabling Spring Security 114
+5.2 Configuring authentication 116
+In-memory user details service 118  Customizing user 
+authentication 119
+5.3 Securing web requests 125
+Securing requests 125  Creating a custom login page 128
+Enabling third-party authentication 131  Preventing cross-site 
+request forgery 133
+5.4 Applying method-level security 134
+5.5 Knowing your user 136
+6 Working with configuration properties 140
+6.1 Fine-tuning autoconfiguration 141
+Understanding Spring’s environment abstraction 142
+Configuring a data source 143  Configuring the embedded 
+server 145  Configuring logging 146  Using special 
+property values 148
+6.2 Creating your own configuration properties 148
+Defining configuration property holders 151  Declaring 
+configuration property metadata 153
+6.3 Configuring with profiles 155
+Defining profile-specific properties 156  Activating profiles 158
+Conditionally creating beans with profiles 159
+PART 2 INTEGRATED SPRING .......................................161
+7 Creating REST services 163
+7.1 Writing RESTful controllers 164
+Retrieving data from the server 164  Sending data to the 
+server 170  Updating data on the server 171  Deleting data 
+from the server 173
+7.2 Enabling data-backed services 174
+Adjusting resource paths and relation names 177  Paging and 
+sorting 179
+7.3 Consuming REST services 180
+GETting resources 182  PUTting resources 183
+DELETEing resources 184  POSTing resource data 184
+8 Securing REST 186
+8.1 Introducing OAuth 2 187
+8.2 Creating an authorization server 192
+8.3 Securing an API with a resource server 201
+8.4 Developing the client 204
+9 Sending messages asynchronously 210
+9.1 Sending messages with JMS 211
+Setting up JMS 211  Sending messages with JmsTemplate 214
+Receiving JMS messages 222
+9.2 Working with RabbitMQ and AMQP 226
+Adding RabbitMQ to Spring 227  Sending messages with 
+RabbitTemplate 228  Receiving messages from RabbitMQ 232
+9.3 Messaging with Kafka 236
+Setting up Spring for Kafka messaging 237  Sending messages 
+with KafkaTemplate 238  Writing Kafka listeners 241
+10 Integrating Spring 243
+10.1 Declaring a simple integration flow 244
+Defining integration flows with XML 246  Configuring 
+integration flows in Java 247  Using Spring Integration’s 
+DSL configuration 249
+10.2 Surveying the Spring Integration landscape 251
+Message channels 252  Filters 253  Transformers 254
+Routers 256  Splitters 257  Service activators 260
+Gateways 262  Channel adapters 263  Endpoint 
+modules 265
+10.3 Creating an email integration flow 267
+PART 3 REACTIVE SPRING ...........................................277
+11 Introducing Reactor 279
+11.1 Understanding reactive programming 280
+Defining Reactive Streams 281
+11.2 Getting started with Reactor 283
+Diagramming reactive flows 285  Adding Reactor 
+dependencies 286
+11.3 Applying common reactive operations 287
+Creating reactive types 287  Combining reactive types 291
+Transforming and filtering reactive streams 295  Performing 
+logic operations on reactive types 305
+12 Developing reactive APIs 308
+12.1 Working with Spring WebFlux 309
+Introducing Spring WebFlux 310  Writing reactive controllers 312
+12.2 Defining functional request handlers 316
+12.3 Testing reactive controllers 320
+Testing GET requests 320  Testing POST requests 323
+Testing with a live server 324
+12.4 Consuming REST APIs reactively 325
+GETting resources 326  Sending resources 328  Deleting 
+resources 329  Handling errors 329  Exchanging requests 331
+12.5 Securing reactive web APIs 333
+Configuring reactive web security 333  Configuring a reactive 
+user details service 335
+13 Persisting data reactively 337
+13.1 Working with R2DBC 338
+Defining domain entities for R2DBC 339  Defining reactive 
+repositories 343  Testing R2DBC repositories 345  Defining 
+an OrderRepository aggregate root service 347
+13.2 Persisting document data reactively with MongoDB 353
+Defining domain document types 354  Defining reactive MongoDB 
+repositories 356  Testing reactive MongoDB repositories 357
+13.3 Reactively persisting data in Cassandra 361
+Defining domain classes for Cassandra persistence 362
+Creating reactive Cassandra repositories 365  Testing reactive 
+Cassandra repositories 366
+14 Working with RSocket 369
+14.1 Introducing RSocket 370
+14.2 Creating a simple RSocket server and client 372
+Working with request-response 372  Handling request-stream 
+messaging 376  Sending fire-and-forget messages 378
+Sending messages bidirectionally 379
+14.3 Transporting RSocket over WebSocket 382
+PART 4 DEPLOYED SPRING ..........................................385
+15 Working with Spring Boot Actuator 387
+15.1 Introducing Actuator 388
+Configuring Actuator’s base path 389  Enabling and disabling 
+Actuator endpoints 390
+15.2 Consuming Actuator endpoints 391
+Fetching essential application information 392  Viewing 
+configuration details 395  Viewing application activity 403
+Tapping runtime metrics 405
+15.3 Customizing Actuator 408
+Contributing information to the /info endpoint 408  Defining 
+custom health indicators 414  Registering custom metrics 415
+Creating custom endpoints 417
+15.4 Securing Actuator 420
+16 Administering Spring 423
+16.1 Using Spring Boot Admin 424
+Creating an Admin server 424  Registering Admin 
+clients 426
+16.2 Exploring the Admin server 427
+Viewing general application health and information 428
+Watching key metrics 428  Examining environment 
+properties 429  Viewing and setting logging levels 431
+16.3 Securing the Admin server 431
+Enabling login in the Admin server 432  Authenticating 
+with the Actuator 433
+17 Monitoring Spring with JMX 435
+17.1 Working with Actuator MBeans 435
+17.2 Creating your own MBeans 437
+17.3 Sending notifications 440
+18 Deploying Spring 443
+18.1 Weighing deployment options 444
+18.2 Building executable JAR files 445
+18.3 Building container images 446
+Deploying to Kubernetes 449  Enabling graceful shutdown 451
+Working with application liveness and readiness 452
+18.4 Building and deploying WAR files 455
+18.5 The end is where we begin 457

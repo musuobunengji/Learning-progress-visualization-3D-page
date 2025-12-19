@@ -1,0 +1,15 @@
+1  Spring in the real world 3
+2  The Spring context: Defining beans 22
+3  The Spring context: Wiring beans 50
+4  The Spring context: Using abstractions 75
+5  The Spring context: Bean scopes and life cycle 99
+6  Using aspects with Spring AOP 121
+7  Understanding Spring Boot and Spring MVC 153
+8  Implementing web apps with Spring Boot and Spring MVC 176
+9  Using the Spring web scopes 199
+10  Implementing REST services 224
+11  Consuming REST endpoints 245
+12  Using data sources in Spring apps 264
+13  Using transactions in Spring apps 284
+14  Implementing data persistence with Spring Data 302
+15  Testing your Spring app 323

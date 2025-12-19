@@ -1,0 +1,388 @@
+[
+    {
+        "id": "spring-in-action::ch1",
+        "order": 1,
+        "title": "Getting started with Spring",
+        "sections": [
+            "What is Spring?",
+            "Initializing a Spring application",
+            "Writing a Spring application",
+            "Surveying the Spring landscape"
+        ],
+        "signals": {
+            "bullets": [
+                "Initializing a Spring project with Spring Tool Suite",
+                "Examining the Spring project structure",
+                "Handling web requests",
+                "Testing the controller",
+                "application",
+                "Let’s review",
+                "The core Spring Framework",
+                "Data",
+                "Batch"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch2",
+        "order": 2,
+        "title": "Developing web applications",
+        "sections": [
+            "Displaying information",
+            "Processing form submission",
+            "Validating form input",
+            "Working with view controllers",
+            "Choosing a view template library"
+        ],
+        "signals": {
+            "bullets": [
+                "Establishing the domain",
+                "Designing the view",
+                "Declaring validation rules",
+                "form binding",
+                "Caching templates"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch3",
+        "order": 3,
+        "title": "Working with data",
+        "sections": [
+            "Reading and writing data with JDBC",
+            "Working with Spring Data JDBC",
+            "Persisting data with Spring Data JPA"
+        ],
+        "signals": {
+            "bullets": [
+                "Adapting the domain for persistence",
+                "JdbcTemplate",
+                "data",
+                "Adding Spring Data JDBC to the build",
+                "repository interfaces",
+                "persistence",
+                "Preloading data with CommandLineRunner",
+                "Adding Spring Data JPA to the project",
+                "domain as entities",
+                "Customizing repositories"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch4",
+        "order": 4,
+        "title": "Working with nonrelational data",
+        "sections": [
+            "Working with Cassandra repositories",
+            "Writing MongoDB repositories"
+        ],
+        "signals": {
+            "bullets": [
+                "Enabling Spring Data Cassandra",
+                "Cassandra data modeling",
+                "for Cassandra persistence",
+                "repositories",
+                "Enabling Spring Data MongoDB",
+                "types to documents",
+                "interfaces"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch5",
+        "order": 5,
+        "title": "Securing Spring",
+        "sections": [
+            "Enabling Spring Security",
+            "Configuring authentication",
+            "Securing web requests",
+            "Applying method-level security",
+            "Knowing your user"
+        ],
+        "signals": {
+            "bullets": [
+                "In-memory user details service",
+                "authentication",
+                "Securing requests",
+                "Enabling third-party authentication",
+                "request forgery"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch6",
+        "order": 6,
+        "title": "Working with configuration properties",
+        "sections": [
+            "Fine-tuning autoconfiguration",
+            "Creating your own configuration properties",
+            "Configuring with profiles"
+        ],
+        "signals": {
+            "bullets": [
+                "Understanding Spring’s environment abstraction",
+                "Configuring a data source",
+                "server",
+                "property values",
+                "Defining configuration property holders",
+                "configuration property metadata",
+                "Defining profile-specific properties",
+                "Conditionally creating beans with profiles",
+                "PART"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch7",
+        "order": 7,
+        "title": "Creating REST services",
+        "sections": [
+            "Writing RESTful controllers",
+            "Enabling data-backed services",
+            "Consuming REST services"
+        ],
+        "signals": {
+            "bullets": [
+                "Retrieving data from the server",
+                "server",
+                "from the server",
+                "Adjusting resource paths and relation names",
+                "sorting",
+                "GETting resources",
+                "DELETEing resources"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch8",
+        "order": 8,
+        "title": "Securing REST",
+        "sections": [
+            "Introducing OAuth 2",
+            "Creating an authorization server",
+            "Securing an API with a resource server",
+            "Developing the client"
+        ],
+        "signals": {
+            "bullets": [],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch9",
+        "order": 9,
+        "title": "Sending messages asynchronously",
+        "sections": [
+            "Sending messages with JMS",
+            "Working with RabbitMQ and AMQP",
+            "Messaging with Kafka"
+        ],
+        "signals": {
+            "bullets": [
+                "Setting up JMS",
+                "Receiving JMS messages",
+                "Adding RabbitMQ to Spring",
+                "RabbitTemplate",
+                "Setting up Spring for Kafka messaging",
+                "with KafkaTemplate"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch10",
+        "order": 10,
+        "title": "Integrating Spring",
+        "sections": [
+            "Declaring a simple integration flow",
+            "Surveying the Spring Integration landscape",
+            "Creating an email integration flow"
+        ],
+        "signals": {
+            "bullets": [
+                "Defining integration flows with XML",
+                "integration flows in Java",
+                "DSL configuration",
+                "Message channels",
+                "Routers",
+                "Gateways",
+                "modules",
+                "PART"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch11",
+        "order": 11,
+        "title": "Introducing Reactor",
+        "sections": [
+            "Understanding reactive programming",
+            "Getting started with Reactor",
+            "Applying common reactive operations"
+        ],
+        "signals": {
+            "bullets": [
+                "Defining Reactive Streams",
+                "Diagramming reactive flows",
+                "dependencies",
+                "Creating reactive types",
+                "Transforming and filtering reactive streams",
+                "logic operations on reactive types"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch12",
+        "order": 12,
+        "title": "Developing reactive APIs",
+        "sections": [
+            "Working with Spring WebFlux",
+            "Defining functional request handlers",
+            "Testing reactive controllers",
+            "Consuming REST APIs reactively",
+            "Securing reactive web APIs"
+        ],
+        "signals": {
+            "bullets": [
+                "Introducing Spring WebFlux",
+                "Testing GET requests",
+                "Testing with a live server",
+                "GETting resources",
+                "resources",
+                "Configuring reactive web security",
+                "user details service"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch13",
+        "order": 13,
+        "title": "Persisting data reactively",
+        "sections": [
+            "Working with R2DBC",
+            "Persisting document data reactively with MongoDB",
+            "Reactively persisting data in Cassandra"
+        ],
+        "signals": {
+            "bullets": [
+                "Defining domain entities for R2DBC",
+                "repositories",
+                "an OrderRepository aggregate root service",
+                "Defining domain document types",
+                "repositories",
+                "Defining domain classes for Cassandra persistence",
+                "Creating reactive Cassandra repositories",
+                "Cassandra repositories"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch14",
+        "order": 14,
+        "title": "Working with RSocket",
+        "sections": [
+            "Introducing RSocket",
+            "Creating a simple RSocket server and client",
+            "Transporting RSocket over WebSocket"
+        ],
+        "signals": {
+            "bullets": [
+                "Working with request-response",
+                "messaging",
+                "Sending messages bidirectionally",
+                "PART"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch15",
+        "order": 15,
+        "title": "Working with Spring Boot Actuator",
+        "sections": [
+            "Introducing Actuator",
+            "Consuming Actuator endpoints",
+            "Customizing Actuator",
+            "Securing Actuator"
+        ],
+        "signals": {
+            "bullets": [
+                "Configuring Actuator’s base path",
+                "Actuator endpoints",
+                "Fetching essential application information",
+                "configuration details",
+                "Tapping runtime metrics",
+                "Contributing information to the /info endpoint",
+                "custom health indicators",
+                "Creating custom endpoints"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch16",
+        "order": 16,
+        "title": "Administering Spring",
+        "sections": [
+            "Using Spring Boot Admin",
+            "Exploring the Admin server",
+            "Securing the Admin server"
+        ],
+        "signals": {
+            "bullets": [
+                "Creating an Admin server",
+                "clients",
+                "Viewing general application health and information",
+                "Watching key metrics",
+                "properties",
+                "Enabling login in the Admin server",
+                "with the Actuator"
+            ],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch17",
+        "order": 17,
+        "title": "Monitoring Spring with JMX",
+        "sections": [
+            "Working with Actuator MBeans",
+            "Creating your own MBeans",
+            "Sending notifications"
+        ],
+        "signals": {
+            "bullets": [],
+            "raw_text": ""
+        }
+    },
+    {
+        "id": "spring-in-action::ch18",
+        "order": 18,
+        "title": "Deploying Spring",
+        "sections": [
+            "Weighing deployment options",
+            "Building executable JAR files",
+            "Building container images",
+            "Building and deploying WAR files",
+            "The end is where we begin"
+        ],
+        "signals": {
+            "bullets": [
+                "Deploying to Kubernetes",
+                "Working with application liveness and readiness"
+            ],
+            "raw_text": ""
+        }
+    }
+]
