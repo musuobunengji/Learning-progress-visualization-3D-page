@@ -1,8 +1,8 @@
 import networkx as nx
 from pathlib import Path
 import argparse
-from src.graph_pipeline import build_graph, draw_graph, compute_layout
-from src.graph_pipeline import ValidationError
+from visualization.graph_pipeline import build_graph, draw_graph, compute_layout
+from visualization.graph_pipeline import ValidationError
 import traceback
 
 

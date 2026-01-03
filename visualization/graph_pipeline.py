@@ -15,8 +15,8 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from pathlib import Path
 
-from src.json_helper_load import load_nodes, load_edges
-from src.normalize_progress import normalize_progress
+from visualization.json_helper_load import load_nodes, load_edges
+from visualization.normalize_progress import normalize_progress
 
 BASE_DIR = Path(__file__).parent
 DEFAULT_DATA_PATH = BASE_DIR / "data.json"
