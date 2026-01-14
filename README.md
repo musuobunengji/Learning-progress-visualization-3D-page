@@ -1,58 +1,63 @@
 # ChapterGraph
 
-**Document Relationship Analysis Pipeline (Python)**
+**Retrieval-Oriented Chapter Relationship Analysis Pipeline (Python)**
 
-ChapterGraph is a Python-based data processing pipeline that analyzes relationships between chapters across multiple technical documents.
-It converts semi-structured technical content into structured data, extracts semantic signals, builds an inverted index, and generates chapter-to-chapter relationship edges based on shared features.
+ChapterGraph is a Python-based retrieval pipeline that analyzes relationships between chapters across multiple curated technical documents.
 
-This project focuses on **internal engineering tooling**, **data pipelines**, and **information retrieval fundamentals**, and is designed to be extensible toward semantic embeddings and visualization.
+The project focuses on **turning semi-structured technical content into structured signals**, and on **designing a debuggable, multi-stage retrieval workflow** for discovering cross-document relationships.
+Rather than optimizing for maximum semantic power, the system emphasizes **pipeline clarity, controllable complexity, and engineering realism**.
+
+This repository is designed as an **internal engineering tool prototype**, with a clear evolution path toward embeddings, vector search, and service deployment.
 
 ---
 
-## ✨ Key Features
+## ✨ Core Capabilities
 
-* **Rule-based document ingestion**
-  Convert curated technical documents into structured JSON representations.
+* **Deterministic document ingestion**
+  Convert curated technical texts into a normalized, chapter-centric JSON schema.
 
-* **Semantic signal extraction**
-  Extract meaningful textual signals (e.g. keywords) at the chapter level.
+* **Signal enrichment at chapter granularity**
+  Aggregate chapter-level textual signals (sections, bullets) into a canonical representation used consistently across the pipeline.
 
-* **Inverted index construction**
-  Build a keyword → chapter lookup table for efficient candidate generation.
+* **Multi-stage retrieval workflow**
+  Explicit separation between candidate generation and similarity scoring, following classical information retrieval design.
 
-* **Relationship edge generation**
-  Generate chapter-to-chapter edges using shared feature overlap and scoring.
+* **Inverted-index–based candidate pruning**
+  Use lightweight lexical signals to aggressively reduce the comparison space before scoring.
 
-* **Modular pipeline design**
-  Each stage (ingestion, enrichment, indexing, edge generation) is isolated and reusable.
+* **Continuous similarity scoring**
+  Apply TF-IDF–based similarity to produce interpretable, continuous relevance scores instead of binary overlaps.
+
+* **Modular, extensible architecture**
+  Candidate generation, similarity scoring, and pipeline orchestration are abstracted to allow controlled evolution.
 
 ---
 
 ## 🧱 Pipeline Overview
 
 ```
-Raw Content (TXT)
-      ↓
+Curated Technical Text
+        ↓
 Ingestion
-      ↓
-Structured JSON
-      ↓
+        ↓
+Structured Chapter JSON
+        ↓
 Signal Enrichment
-      ↓
-Keyword Index (Inverted Index)
-      ↓
-Candidate Generation
-      ↓
-Edge Scoring
-      ↓
+        ↓
+Chapter Text Normalization
+        ↓
+Candidate Generation (Inverted Index)
+        ↓
+Similarity Scoring (TF-IDF)
+        ↓
 Chapter Relationship Graph
 ```
 
-This follows a **classical multi-stage retrieval pipeline**:
+The system follows a **classical multi-stage retrieval funnel**:
 
-* Fast pruning via inverted index
-* Lightweight scoring based on feature overlap
-* Designed for future semantic re-ranking (embeddings, vector search)
+* **Early pruning for efficiency** (candidate generation)
+* **Scoring for relevance** (similarity computation)
+* **Designed for future semantic upgrades**, without coupling them prematurely to the core pipeline
 
 ---
 
@@ -61,121 +66,134 @@ This follows a **classical multi-stage retrieval pipeline**:
 ```
 .
 ├── book_content/
-│   ├── books.yaml                 # Book configuration (metadata & paths)
+│   ├── books.yaml                 # Document configuration
 │   ├── core_java_content.txt
 │   ├── spring_in_action_content.txt
 │   └── spring_start_here_content.txt
 │
 ├── feature_achievement/
-│   ├── ingestion.py               # Document ingestion & parsing
-│   ├── enrichment.py              # Signal / keyword extraction
-│   ├── index.py                   # Inverted index construction
-│   ├── edge_generation.py         # Candidate generation & scoring
-│   ├── pipeline.py                # End-to-end pipeline entry
+│   ├── ingestion/                 # Parsing & normalization
+│   ├── enrichment/                # Chapter-level signal construction
+│   │
+│   ├── retrieval/
+│   │   ├── candidates/            # Candidate generation strategies
+│   │   ├── similarity/            # Similarity scoring strategies
+│   │   ├── utils/                 # Shared builders (TF-IDF, indices)
+│   │   ├── pipeline.py            # RetrievalPipeline orchestration
+│   │   └── edge_generation.py     # Thin edge construction layer
+│   │
 │   └── __init__.py
 │
 └── README.md
 ```
 
+The codebase is structured to clearly distinguish between:
+
+* **Workflow orchestration**
+* **Replaceable retrieval strategies**
+* **Shared resource construction**
+
 ---
 
-## ▶️ How to Run
+## ▶️ Running the Pipeline
 
-> ⚠️ **Note**
-> This project assumes the input documents are **curated technical texts**.
-> The ingestion logic is intentionally conservative and does not aim to handle arbitrary raw files.
+> ⚠️ **Assumption**
+> Input documents are **manually curated technical texts**.
+> Ingestion is intentionally conservative and not designed for arbitrary raw files.
 
-### 1. Configure input documents
+### 1. Configure documents
 
 Edit `book_content/books.yaml`:
 
 ```yaml
-books:
-  - book_name: core-java
-    content_path: book_content/core_java_content.txt
+- book_name: core-java
+  content_path: book_content/core_java_content.txt
 
-  - book_name: spring-in-action
-    content_path: book_content/spring_in_action_content.txt
+- book_name: spring-in-action
+  content_path: book_content/spring_in_action_content.txt
 ```
 
 ---
 
-### 2. Run the pipeline
+### 2. Execute retrieval pipeline
 
 From the project root:
 
 ```bash
-python -m feature_achievement.pipeline
+python -m feature_achievement.run_retrieval
 ```
 
 This will:
 
-1. Load all configured documents
-2. Enrich chapters with semantic signals
-3. Build a keyword inverted index
-4. Generate chapter-to-chapter relationship edges
+1. Load and normalize all configured documents
+2. Construct chapter-level text signals
+3. Build inverted indices for candidate generation
+4. Compute TF-IDF similarity scores
+5. Generate chapter-to-chapter relationship edges
 
-The resulting edges are printed to stdout (or can be redirected to JSON).
+Edges are printed to stdout and can be redirected or persisted as needed.
 
 ---
 
-## 🔗 Edge Format (Example)
+## 🔗 Edge Format
 
 ```json
 {
   "from": "core-java::ch3",
   "to": "spring-in-action::ch1",
-  "type": "keyword_overlap",
-  "score": 4
+  "type": "tfidf_similarity",
+  "score": 0.37
 }
 ```
 
-* `from` / `to`: Chapter IDs
+* `from` / `to`: Chapter identifiers
 * `type`: Relationship type
-* `score`: Number of shared keywords (lightweight similarity signal)
+* `score`: Continuous similarity score (TF-IDF)
 
 ---
 
-## 🧠 Design Decisions
+## 🧠 Design Rationale
 
-* **Rule-based first**
-  Feature extraction is intentionally rule-based to ensure transparency and debuggability.
+* **Pipeline before models**
+  The system prioritizes observability and debuggability over early use of opaque models.
 
-* **Index before scoring**
-  Inverted index drastically reduces comparison complexity.
+* **Candidate generation ≠ similarity scoring**
+  Retrieval stages are explicitly separated to control complexity and scaling behavior.
 
-* **Chapter-level granularity**
-  Relationships are modeled between chapters, not entire books.
+* **Stop at the right abstraction boundary**
+  Embeddings and vector databases are recognized as the natural next step, but intentionally excluded to keep the project realistic, inspectable, and aligned with intern-level ownership.
 
-* **Pipeline > script**
-  The codebase is structured as a pipeline, not a one-off analysis script.
+* **Interfaces over hard-coded logic**
+  Core components are abstracted to enable future extensions without structural rewrites.
 
 ---
 
-## 🚀 Future Work
+## 🚀 Intended Extensions (Out of Scope for Current Version)
 
-* Semantic embeddings for reranking (e.g. sentence transformers)
-* Vector index (FAISS / HNSW)
-* FastAPI service layer
-* Message-queue–based batch processing
+* Embedding-based similarity (sentence transformers)
+* Vector indices (FAISS / HNSW)
+* FastAPI service layer for internal tooling
+* Batch processing via message queues
 * Graph visualization frontend
+
+These are treated as **future evolution paths**, not missing features.
 
 ---
 
 ## 🛠 Tech Stack
 
 * Python 3
-* Standard library (argparse, dataclasses, typing)
+* scikit-learn (TF-IDF)
 * YAML-based configuration
-* Modular pipeline architecture
+* Modular, retrieval-oriented pipeline design
 
 ---
 
-## 📌 Status
+## 📌 Project Status
 
-This project is actively evolving and currently focuses on:
+This project intentionally concludes at a **retrieval-focused, pre-embedding stage** and currently emphasizes:
 
-* Data ingestion correctness
-* Pipeline clarity
-* Retrieval & candidate generation fundamentals
-
+* Correctness of ingestion and normalization
+* Clear separation of retrieval stages
+* Stable and explainable system behavior
+* Sound engineering judgment over feature breadth
