@@ -12,6 +12,7 @@ from feature_achievement.retrieval.candidates.tfidf_token import (
 )
 from feature_achievement.retrieval.similarity.tfidf import TfidfSimilarityScorer
 from feature_achievement.retrieval.pipeline import RetrievalPipeline
+from feature_achievement.db.engine import get_session
 
 
 @lru_cache
@@ -48,3 +49,7 @@ def get_enriched_books():
     Load data once.
     """
     return load_all_enriched_data("book_content/books.yaml")
+
+
+def get_db():
+    yield from get_session()

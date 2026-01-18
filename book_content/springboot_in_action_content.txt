@@ -1,0 +1,104 @@
+1 Bootstarting Spring 1 
+1.1 Spring rebooted 2 
+Taking a fresh look at Spring 2 
+Examining Spring Boot 
+essentials 4 
+What Spring Boot isn’t 7 
+1.2 Getting started with Spring Boot 8 
+Installing the Spring Boot CLI 8 
+Initializing a Spring Boot 
+project with Spring Initializr 12 
+1.3 Summary 22 
+2 Developing your first Spring Boot application 23 
+2.1 Putting Spring Boot to work 24 
+Examining a newly initialized Spring Boot project 26 
+Dissecting 
+a Spring Boot project build 30 
+2.2 Using starter dependencies 33 
+Specifying facet-based dependencies 34 
+Overriding starter 
+transitive dependencies 35 
+2.3 Using automatic configuration 37 
+Focusing on application functionality 37 
+Running the 
+application 43 
+What just happened? 45 
+2.4 Summary 48 
+3 Customizing configuration 49 
+3.1 Overriding Spring Boot auto-configuration 50 
+Securing the application 50 
+Creating a custom security 
+configuration 51 
+Taking another peek under the covers of 
+auto-configuration 55 
+3.2 Externalizing configuration with properties 57 
+Fine-tuning auto-configuration 58 
+Externally configuring 
+application beans 64 
+Configuring with profiles 69 
+3.3 Customizing application error pages 71 
+3.4 Summary 74 
+4 Testing with Spring Boot 76 
+4.1 Integration testing auto-configuration 77 
+4.2 Testing web applications 79 
+Mocking Spring MVC 80 
+Testing web security 83 
+4.3 Testing a running application 86 
+Starting the server on a random port 87 
+Testing HTML pages 
+with Selenium 88 
+4.4 Summary 90 
+5 Getting Groovy with the Spring Boot CLI 92 
+5.1 Developing a Spring Boot CLI application 93 
+Setting up the CLI project 93 
+Eliminating code noise with 
+Groovy 94 
+What just happened? 98 
+5.2 Grabbing dependencies 100 
+Overriding default dependency versions 101 
+Adding dependency 
+repositories 102 
+5.3 Running tests with the CLI 102 
+5.4 Creating a deployable artifact 105 
+5.5 Summary 106 
+6 ApplyingGrails in Spring Boot 107 
+6.1 Using GORM for data persistence 108 
+6.2 Defining views with Groovy Server Pages 113 
+6.3 Mixing Spring Boot with Grails 3 115 
+Creating a new Grails project 116 
+Defining the domain 118 
+Writing a Grails controller 119 
+Creating the view 120 
+6.4 Summary 123 
+7 Taking a peek inside with the Actuator 124 
+7.1 Exploring the Actuator’s endpoints 125 
+Viewing configuration details 126 
+Tapping runtime metrics 133 
+Shutting down the application 139 
+Fetching application 
+information 140 
+7.2 Connecting to the Actuator remote shell 141 
+Viewing the autoconfig report 142 
+Listing application beans 143 
+Watching application metrics 144 
+Invoking Actuator endpoints 145 
+7.3 Monitoring your application with JMX 146 
+7.4 Customizing the Actuator 148 
+Changing endpoint IDs 148 
+Enabling and disabling endpoints 149 
+Adding custom metrics and gauges 149 
+Creating a custom trace 
+repository 153 
+Plugging in custom health indicators 155 
+7.5 Securing Actuator endpoints 156 
+7.6 Summary 159 
+8 Deploying Spring Boot applications 160 
+8.1 Weighing deployment options 161 
+8.2 Deploying to an application server 162 
+Building a WAR file 162 
+Creating a production profile 164 
+Enabling database migration 168 
+8.3 Pushing to the cloud 173 
+Deploying to Cloud Foundry 173 
+Deploying to Heroku 177 
+8.4 Summary 180 

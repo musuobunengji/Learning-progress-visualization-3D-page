@@ -1,8 +1,8 @@
 - book_name: "spring-in-action"
   content_path: "book_content/spring_in_action_content.txt"
 
-- book_name: "core-java"
-  content_path: "book_content/core_java_content.txt"
+- book_name: "springboot_in_action"
+  content_path: "book_content/springboot_in_action_content.txt"
 
 - book_name: "spring-start-here"
   content_path: "book_content/spring_start_here_content.txt"
