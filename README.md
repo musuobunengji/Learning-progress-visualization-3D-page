@@ -1,199 +1,207 @@
 # ChapterGraph
 
-**Retrieval-Oriented Chapter Relationship Analysis Pipeline (Python)**
+**A Retrieval-Backed Knowledge Graph for Technical Documents**
 
-ChapterGraph is a Python-based retrieval pipeline that analyzes relationships between chapters across multiple curated technical documents.
+ChapterGraph is an end-to-end backend system that builds, persists, and queries semantic relationships between chapters across multiple technical books. The project is designed as a **modular retrieval pipeline** rather than a monolithic ML demo, with clear separation between ingestion, enrichment, candidate generation, similarity scoring, persistence, and API exposure.
 
-The project focuses on **turning semi-structured technical content into structured signals**, and on **designing a debuggable, multi-stage retrieval workflow** for discovering cross-document relationships.
-Rather than optimizing for maximum semantic power, the system emphasizes **pipeline clarity, controllable complexity, and engineering realism**.
-
-This repository is designed as an **internal engineering tool prototype**, with a clear evolution path toward embeddings, vector search, and service deployment.
+This repository emphasizes **engineering correctness, observability, and extensibility** over premature modeling complexity.
 
 ---
 
 ## ✨ Core Capabilities
 
-* **Deterministic document ingestion**
-  Convert curated technical texts into a normalized, chapter-centric JSON schema.
+* **Document Ingestion**
+  Parse structured book content into normalized JSON representations.
 
-* **Signal enrichment at chapter granularity**
-  Aggregate chapter-level textual signals (sections, bullets) into a canonical representation used consistently across the pipeline.
+* **Signal Enrichment**
+  Derive chapter-level textual signals (e.g. `chapter_text`) used as inputs to retrieval models.
 
-* **Multi-stage retrieval workflow**
-  Explicit separation between candidate generation and similarity scoring, following classical information retrieval design.
+* **Multi-Stage Retrieval Pipeline**
 
-* **Inverted-index–based candidate pruning**
-  Use lightweight lexical signals to aggressively reduce the comparison space before scoring.
+  * Candidate generation (pruning search space)
+  * Similarity scoring (TF-IDF–based ranking)
+  * Thresholding / filtering
 
-* **Continuous similarity scoring**
-  Apply TF-IDF–based similarity to produce interpretable, continuous relevance scores instead of binary overlaps.
+* **Graph Construction**
+  Generate directed, weighted edges between chapters representing semantic relatedness.
 
-* **Modular, extensible architecture**
-  Candidate generation, similarity scoring, and pipeline orchestration are abstracted to allow controlled evolution.
+* **Persistent Storage (PostgreSQL)**
+  Store books, chapters, and edges as first-class relational entities.
 
----
-
-## 🧱 Pipeline Overview
-
-```
-Curated Technical Text
-        ↓
-Ingestion
-        ↓
-Structured Chapter JSON
-        ↓
-Signal Enrichment
-        ↓
-Chapter Text Normalization
-        ↓
-Candidate Generation (Inverted Index)
-        ↓
-Similarity Scoring (TF-IDF)
-        ↓
-Chapter Relationship Graph
-```
-
-The system follows a **classical multi-stage retrieval funnel**:
-
-* **Early pruning for efficiency** (candidate generation)
-* **Scoring for relevance** (similarity computation)
-* **Designed for future semantic upgrades**, without coupling them prematurely to the core pipeline
+* **Retrieval-Backed API (FastAPI)**
+  Expose compute and query endpoints backed by a real database.
 
 ---
 
-## 📁 Project Structure
+## 🧠 Design Philosophy
 
-```
-.
-├── book_content/
-│   ├── books.yaml                 # Document configuration
-│   ├── core_java_content.txt
-│   ├── spring_in_action_content.txt
-│   └── spring_start_here_content.txt
+### 1. Funnel-Based Retrieval (Classical IR)
+
+The system follows a classical **funnel architecture**:
+
+1. **Candidate Generation** – fast, coarse pruning (avoid full pairwise comparison)
+2. **Similarity Scoring** – more expensive ranking (TF-IDF)
+3. **Filtering** – score threshold / top-k
+4. **Persistence** – store results for downstream use
+
+This mirrors production-grade search and recommendation systems.
+
+### 2. Interface-First, OO Design
+
+Key components are defined via interfaces, enabling future extension without refactoring:
+
+* Candidate generators (rule-based, TF-IDF token–based, etc.)
+* Similarity scorers (TF-IDF today, embeddings tomorrow)
+* Retrieval pipeline orchestrator
+
+### 3. Deliberate Model Choice
+
+TF-IDF is used intentionally as the **first semantic baseline**:
+
+* Deterministic
+* Debuggable
+* Interpretable
+
+Embedding-based similarity is treated as a **future drop-in replacement**, not a prerequisite.
+
+---
+
+## 🗂 Project Structure
+
+```text
+feature_achievement/
+├── ingestion/              # Parse raw book content → structured JSON
+│   └── ...
 │
-├── feature_achievement/
-│   ├── ingestion/                 # Parsing & normalization
-│   ├── enrichment/                # Chapter-level signal construction
-│   │
-│   ├── retrieval/
-│   │   ├── candidates/            # Candidate generation strategies
-│   │   ├── similarity/            # Similarity scoring strategies
-│   │   ├── utils/                 # Shared builders (TF-IDF, indices)
-│   │   ├── pipeline.py            # RetrievalPipeline orchestration
-│   │   └── edge_generation.py     # Thin edge construction layer
-│   │
-│   └── __init__.py
+├── enrichment/             # Derive chapter-level signals (chapter_text, etc.)
+│   └── ...
 │
-└── README.md
+├── retrieval/
+│   ├── candidates/         # Candidate generation strategies
+│   │   ├── base.py
+│   │   └── tfidf_token.py
+│   │
+│   ├── similarity/         # Similarity scoring strategies
+│   │   ├── base.py
+│   │   └── tfidf.py
+│   │
+│   ├── pipeline.py         # RetrievalPipeline orchestrator
+│   └── edge_generation.py  # Convert retrieval output → graph edges
+│
+├── db/
+│   ├── models.py           # Book / Chapter / Edge (SQLModel)
+│   ├── db.py               # Engine, session, init_db
+│   └── crud.py             # Persistence helpers
+│
+├── api/
+│   ├── main.py             # FastAPI app
+│   ├── deps.py             # Dependency wiring
+│   └── routers/
+│       └── edges.py        # Compute + query edges
+│
+├── scripts/
+│   └── init_db.py          # Initialize database schema
+│
+└── pipeline.py             # Script-style pipeline entry (non-API)
 ```
-
-The codebase is structured to clearly distinguish between:
-
-* **Workflow orchestration**
-* **Replaceable retrieval strategies**
-* **Shared resource construction**
 
 ---
 
-## ▶️ Running the Pipeline
+## 🗄 Database Schema (PostgreSQL)
 
-> ⚠️ **Assumption**
-> Input documents are **manually curated technical texts**.
-> Ingestion is intentionally conservative and not designed for arbitrary raw files.
+### Book
 
-### 1. Configure documents
+* `id` (PK)
+* `title`
+* `created_at`
 
-Edit `book_content/books.yaml`:
+### Chapter
 
-```yaml
-- book_name: core-java
-  content_path: book_content/core_java_content.txt
+* `id` (PK)
+* `book_id` (indexed)
+* `chapter_text`
+* `created_at`
 
-- book_name: spring-in-action
-  content_path: book_content/spring_in_action_content.txt
-```
+### Edge
+
+* `id` (PK)
+* `from_chapter` (indexed)
+* `to_chapter` (indexed)
+* `score`
+* `type` (e.g. `tfidf`)
+* `created_at`
+
+The schema enforces a **node-before-edge** persistence model, mirroring graph system best practices.
 
 ---
 
-### 2. Execute retrieval pipeline
+## 🚀 Running the Project
 
-From the project root:
+### 1️⃣ Initialize Database
 
 ```bash
-python -m feature_achievement.run_retrieval
+python -m feature_achievement.scripts.init_db
 ```
 
-This will:
+### 2️⃣ Start API Server
 
-1. Load and normalize all configured documents
-2. Construct chapter-level text signals
-3. Build inverted indices for candidate generation
-4. Compute TF-IDF similarity scores
-5. Generate chapter-to-chapter relationship edges
-
-Edges are printed to stdout and can be redirected or persisted as needed.
-
----
-
-## 🔗 Edge Format
-
-```json
-{
-  "from": "core-java::ch3",
-  "to": "spring-in-action::ch1",
-  "type": "tfidf_similarity",
-  "score": 0.37
-}
+```bash
+uvicorn feature_achievement.api.main:app --reload
 ```
 
-* `from` / `to`: Chapter identifiers
-* `type`: Relationship type
-* `score`: Continuous similarity score (TF-IDF)
+Open Swagger UI:
+
+```
+http://127.0.0.1:8000/docs
+```
 
 ---
 
-## 🧠 Design Rationale
+## 🔌 API Endpoints
 
-* **Pipeline before models**
-  The system prioritizes observability and debuggability over early use of opaque models.
+### `POST /compute-edges`
 
-* **Candidate generation ≠ similarity scoring**
-  Retrieval stages are explicitly separated to control complexity and scaling behavior.
+* Runs retrieval pipeline
+* Persists books, chapters, and edges
+* Designed for batch / MQ-style execution
 
-* **Stop at the right abstraction boundary**
-  Embeddings and vector databases are recognized as the natural next step, but intentionally excluded to keep the project realistic, inspectable, and aligned with intern-level ownership.
+### `GET /edges?book_id=...`
 
-* **Interfaces over hard-coded logic**
-  Core components are abstracted to enable future extensions without structural rewrites.
-
----
-
-## 🚀 Intended Extensions (Out of Scope for Current Version)
-
-* Embedding-based similarity (sentence transformers)
-* Vector indices (FAISS / HNSW)
-* FastAPI service layer for internal tooling
-* Batch processing via message queues
-* Graph visualization frontend
-
-These are treated as **future evolution paths**, not missing features.
+* Query all edges associated with a given book
+* Returns both incoming and outgoing relationships
 
 ---
 
-## 🛠 Tech Stack
+## 🧪 Observability & Debugging
 
-* Python 3
-* scikit-learn (TF-IDF)
-* YAML-based configuration
-* Modular, retrieval-oriented pipeline design
+The pipeline is intentionally designed to allow inspection at every stage:
+
+* Raw chapter text
+* TF-IDF vectors
+* Top-N similar chapters
+* Persisted edges
+
+This makes semantic errors diagnosable **before** introducing black-box models.
 
 ---
 
-## 📌 Project Status
+## 🔮 Future Extensions
 
-This project intentionally concludes at a **retrieval-focused, pre-embedding stage** and currently emphasizes:
+* Embedding-based similarity (drop-in replacement)
+* Asynchronous retrieval jobs (MQ / worker)
+* Edge pagination & filtering
+* Graph visualization (D3 / WebGL)
+* Vector database integration
 
-* Correctness of ingestion and normalization
-* Clear separation of retrieval stages
-* Stable and explainable system behavior
-* Sound engineering judgment over feature breadth
+---
+
+## 📌 Summary
+
+ChapterGraph is not a demo of a single model, but a **retrieval system**:
+
+* Modular
+* Inspectable
+* Persisted
+* API-backed
+
+It is designed to scale in both **data volume** and **model sophistication** without architectural rewrites.
