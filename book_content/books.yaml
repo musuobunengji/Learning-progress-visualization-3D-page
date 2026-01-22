@@ -1,7 +1,7 @@
 - book_name: "spring-in-action"
   content_path: "book_content/spring_in_action_content.txt"
 
-- book_name: "springboot_in_action"
+- book_name: "springboot-in-action"
   content_path: "book_content/springboot_in_action_content.txt"
 
 - book_name: "spring-start-here"
