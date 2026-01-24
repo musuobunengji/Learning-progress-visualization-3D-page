@@ -10,39 +10,97 @@ const runSelect = document.getElementById("runSelect");
 const themeToggle = document.getElementById("themeToggle");
 const tooltip = document.getElementById("tooltip");
 
-let dimensions = { width: window.innerWidth, height: window.innerHeight };
-let graph = null;
-let expandedBooks = new Set();
-let nodes = [];
-let links = [];
-let simulation = null;
-let transform = d3.zoomIdentity;
-let hoveredNode = null;
-let animationFrame = null;
-let currentTheme = "light";
+const state = {
+    graph: null,
+    expandedBooks: new Set(),
+    nodes: [],
+    links: [],
+    simulation: null,
+    transform: d3.zoomIdentity,
+    hoveredNode: null,
+    dimensions: { width: window.innerWidth, height: window.innerHeight },
+    theme: "light",
+    animationFrame: null,
+};
+
+const ActionTypes = {
+    SET_GRAPH: "SET_GRAPH",
+    TOGGLE_BOOK: "TOGGLE_BOOK",
+    SET_HOVERED_NODE: "SET_HOVERED_NODE",
+    SET_TRANSFORM: "SET_TRANSFORM",
+    SET_THEME: "SET_THEME",
+    RESIZE: "RESIZE",
+};
+
+function dispatch(action) {
+    switch (action.type) {
+        case ActionTypes.SET_GRAPH: {
+            state.graph = action.payload.graph;
+            state.expandedBooks.clear();
+            rebuildGraph();
+            break;
+        }
+        case ActionTypes.TOGGLE_BOOK: {
+            const bookId = action.payload.bookId;
+            if (state.expandedBooks.has(bookId)) {
+                state.expandedBooks.delete(bookId);
+            } else {
+                state.expandedBooks.add(bookId);
+            }
+            rebuildGraph();
+            break;
+        }
+        case ActionTypes.SET_HOVERED_NODE: {
+            state.hoveredNode = action.payload.node;
+            break;
+        }
+        case ActionTypes.SET_TRANSFORM: {
+            state.transform = action.payload.transform;
+            break;
+        }
+        case ActionTypes.SET_THEME: {
+            state.theme = action.payload.theme;
+            document.documentElement.dataset.theme =
+                state.theme === "dark" ? "dark" : "light";
+            if (themeToggle) {
+                themeToggle.textContent =
+                    state.theme === "dark" ? "Theme: Dark" : "Theme: Light";
+            }
+            break;
+        }
+        case ActionTypes.RESIZE: {
+            state.dimensions = action.payload.dimensions;
+            canvas.width = state.dimensions.width;
+            canvas.height = state.dimensions.height;
+            rebuildGraph();
+            break;
+        }
+        default:
+            console.warn("Unknown action", action);
+    }
+}
 
 function resize() {
-    dimensions = { width: window.innerWidth, height: window.innerHeight };
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    dispatch({
+        type: ActionTypes.RESIZE,
+        payload: {
+            dimensions: { width: window.innerWidth, height: window.innerHeight },
+        },
+    });
 }
 
 resize();
 window.addEventListener("resize", resize);
 
 function setTheme(theme) {
-    currentTheme = theme;
-    document.documentElement.dataset.theme = theme === "dark" ? "dark" : "light";
-    if (themeToggle) {
-        themeToggle.textContent = theme === "dark" ? "Theme: Dark" : "Theme: Light";
-    }
+    dispatch({ type: ActionTypes.SET_THEME, payload: { theme } });
 }
 
 setTheme("light");
 
 if (themeToggle) {
     themeToggle.addEventListener("click", () => {
-        setTheme(currentTheme === "dark" ? "light" : "dark");
+        setTheme(state.theme === "dark" ? "light" : "dark");
     });
 }
 
@@ -59,8 +117,8 @@ function getNodeRadius(node) {
 }
 
 function findNodeAtPosition(x, y) {
-    for (let i = nodes.length - 1; i >= 0; i -= 1) {
-        const n = nodes[i];
+    for (let i = state.nodes.length - 1; i >= 0; i -= 1) {
+        const n = state.nodes[i];
         if (n.x == null || n.y == null) continue;
         const r = getNodeRadius(n);
         const dx = x - n.x;
@@ -108,9 +166,7 @@ function loadGraph(runId) {
     fetch(`${API}/graph?run_id=${runId}`)
         .then(res => res.json())
         .then(data => {
-            graph = data;
-            expandedBooks = new Set();
-            rebuildGraph();
+            dispatch({ type: ActionTypes.SET_GRAPH, payload: { graph: data } });
         })
         .catch(console.error);
 }
@@ -119,10 +175,10 @@ function loadGraph(runId) {
 // 构建节点/边
 // ========================
 function rebuildGraph() {
-    if (!graph) return;
+    if (!state.graph) return;
 
-    const books = graph.nodes.filter(n => n.type === "book");
-    const chapters = graph.nodes.filter(n => n.type === "chapter");
+    const books = state.graph.nodes.filter(n => n.type === "book");
+    const chapters = state.graph.nodes.filter(n => n.type === "chapter");
 
     const chapterCountMap = new Map();
     chapters.forEach(c => {
@@ -138,14 +194,14 @@ function rebuildGraph() {
     });
 
     const prevPositions = new Map();
-    nodes.forEach(n => {
+    state.nodes.forEach(n => {
         if (n.x != null && n.y != null) {
             prevPositions.set(n.id, { x: n.x, y: n.y, fx: n.fx, fy: n.fy });
         }
     });
 
     const chapterCentroids = new Map();
-    nodes.forEach(n => {
+    state.nodes.forEach(n => {
         if (n.type !== "chapter" || n.x == null || n.y == null) return;
         const current = chapterCentroids.get(n.bookId) ?? { x: 0, y: 0, count: 0 };
         chapterCentroids.set(n.bookId, {
@@ -163,11 +219,13 @@ function rebuildGraph() {
         const color = bookColorMap.get(book.id);
         const bookKey = `book-${book.id}`;
 
-        if (expandedBooks.has(book.id)) {
+        if (state.expandedBooks.has(book.id)) {
             const base = prevPositions.get(bookKey);
             const centroid = chapterCentroids.get(book.id);
-            const bx = base?.x ?? (centroid ? centroid.x / centroid.count : dimensions.width / 2);
-            const by = base?.y ?? (centroid ? centroid.y / centroid.count : dimensions.height / 2);
+            const bx = base?.x ??
+                (centroid ? centroid.x / centroid.count : state.dimensions.width / 2);
+            const by = base?.y ??
+                (centroid ? centroid.y / centroid.count : state.dimensions.height / 2);
 
             const bookChapters = chapters.filter(c => c.book_id === book.id);
             bookChapters.forEach((c, i) => {
@@ -207,7 +265,7 @@ function rebuildGraph() {
         }
     });
 
-    graph.edges.forEach(e => {
+    state.graph.edges.forEach(e => {
         const s = `chapter-${e.source}`;
         const t = `chapter-${e.target}`;
         if (visibleChapterIds.has(s) && visibleChapterIds.has(t)) {
@@ -215,21 +273,24 @@ function rebuildGraph() {
         }
     });
 
-    nodes = nextNodes;
-    links = nextLinks;
+    state.nodes = nextNodes;
+    state.links = nextLinks;
 
-    if (simulation) simulation.stop();
-    simulation = d3
-        .forceSimulation(nodes)
+    if (state.simulation) state.simulation.stop();
+    state.simulation = d3
+        .forceSimulation(state.nodes)
         .force(
             "link",
-            d3.forceLink(links)
+            d3.forceLink(state.links)
                 .id(d => d.id)
                 .strength(d => Math.min(0.2, d.score))
                 .distance(d => 20 + (1 - d.score) * 60),
         )
         .force("charge", d3.forceManyBody().strength(-30))
-        .force("center", d3.forceCenter(dimensions.width / 2, dimensions.height / 2));
+        .force(
+            "center",
+            d3.forceCenter(state.dimensions.width / 2, state.dimensions.height / 2),
+        );
 }
 
 // ========================
@@ -237,6 +298,7 @@ function rebuildGraph() {
 // ========================
 function draw() {
     if (!ctx) return;
+    const { nodes, links, transform, hoveredNode, dimensions } = state;
     const t = transform;
     const styles = getComputedStyle(document.documentElement);
     const edgeBase = styles.getPropertyValue("--edge").trim() || "rgba(100,116,139,0.22)";
@@ -296,7 +358,7 @@ function draw() {
 
 function render() {
     draw();
-    animationFrame = requestAnimationFrame(render);
+    state.animationFrame = requestAnimationFrame(render);
 }
 
 render();
@@ -309,17 +371,20 @@ const zoomBehavior = d3
     .scaleExtent([0.2, 5])
     .filter(event => event.type !== "dblclick")
     .on("zoom", event => {
-        transform = event.transform;
+        dispatch({
+            type: ActionTypes.SET_TRANSFORM,
+            payload: { transform: event.transform },
+        });
     });
 
 d3.select(canvas).call(zoomBehavior);
 
 canvas.addEventListener("mousemove", event => {
     const rect = canvas.getBoundingClientRect();
-    const x = (event.clientX - rect.left - transform.x) / transform.k;
-    const y = (event.clientY - rect.top - transform.y) / transform.k;
+    const x = (event.clientX - rect.left - state.transform.x) / state.transform.k;
+    const y = (event.clientY - rect.top - state.transform.y) / state.transform.k;
     const hit = findNodeAtPosition(x, y);
-    hoveredNode = hit;
+    dispatch({ type: ActionTypes.SET_HOVERED_NODE, payload: { node: hit } });
     canvas.style.cursor = hit ? "pointer" : "default";
 
     if (tooltip) {
@@ -344,7 +409,7 @@ canvas.addEventListener("mousemove", event => {
 });
 
 canvas.addEventListener("mouseleave", () => {
-    hoveredNode = null;
+    dispatch({ type: ActionTypes.SET_HOVERED_NODE, payload: { node: null } });
     canvas.style.cursor = "default";
     if (tooltip) {
         tooltip.style.opacity = "0";
@@ -353,16 +418,13 @@ canvas.addEventListener("mouseleave", () => {
 
 canvas.addEventListener("dblclick", event => {
     const rect = canvas.getBoundingClientRect();
-    const x = (event.clientX - rect.left - transform.x) / transform.k;
-    const y = (event.clientY - rect.top - transform.y) / transform.k;
+    const x = (event.clientX - rect.left - state.transform.x) / state.transform.k;
+    const y = (event.clientY - rect.top - state.transform.y) / state.transform.k;
     const hit = findNodeAtPosition(x, y);
     if (!hit) return;
 
-    const bookId = hit.bookId;
-    if (expandedBooks.has(bookId)) {
-        expandedBooks.delete(bookId);
-    } else {
-        expandedBooks.add(bookId);
-    }
-    rebuildGraph();
+    dispatch({
+        type: ActionTypes.TOGGLE_BOOK,
+        payload: { bookId: hit.bookId },
+    });
 });
