@@ -1,27 +1,7 @@
 // ========================
-// 基础配置
+// Graph helpers (no React)
 // ========================
-const API = "http://127.0.0.1:8000";
 const BOOK_COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"];
-
-const canvas = document.getElementById("graph");
-const ctx = canvas.getContext("2d");
-const runSelect = document.getElementById("runSelect");
-const themeToggle = document.getElementById("themeToggle");
-const tooltip = document.getElementById("tooltip");
-const simulationRef = { current: null };
-
-const state = {
-    graph: null,
-    expandedBooks: new Set(),
-    nodes: [],
-    links: [],
-    transform: d3.zoomIdentity,
-    hoveredNode: null,
-    dimensions: { width: window.innerWidth, height: window.innerHeight },
-    theme: "light",
-    animationFrame: null,
-};
 
 const ActionTypes = {
     SET_GRAPH: "SET_GRAPH",
@@ -68,60 +48,6 @@ function reducer(currentState, action) {
     }
 }
 
-function dispatch(action) {
-    const nextPartialState = reducer(state, action);
-    Object.assign(state, nextPartialState);
-
-    if (action.type === ActionTypes.SET_THEME) {
-        document.documentElement.dataset.theme =
-            state.theme === "dark" ? "dark" : "light";
-        if (themeToggle) {
-            themeToggle.textContent =
-                state.theme === "dark" ? "Theme: Dark" : "Theme: Light";
-        }
-    }
-
-    if (action.type === ActionTypes.RESIZE) {
-        canvas.width = state.dimensions.width;
-        canvas.height = state.dimensions.height;
-        rebuildGraph();
-    }
-
-    if (
-        action.type === ActionTypes.SET_GRAPH ||
-        action.type === ActionTypes.TOGGLE_BOOK
-    ) {
-        rebuildGraph();
-    }
-}
-
-function resize() {
-    dispatch({
-        type: ActionTypes.RESIZE,
-        payload: {
-            dimensions: { width: window.innerWidth, height: window.innerHeight },
-        },
-    });
-}
-
-resize();
-window.addEventListener("resize", resize);
-
-function setTheme(theme) {
-    dispatch({ type: ActionTypes.SET_THEME, payload: { theme } });
-}
-
-setTheme("light");
-
-if (themeToggle) {
-    themeToggle.addEventListener("click", () => {
-        setTheme(state.theme === "dark" ? "light" : "dark");
-    });
-}
-
-// ========================
-// 工具函数
-// ========================
 function getBookRadius(node) {
     const count = node.chapterCount ?? 1;
     return 12 + Math.sqrt(Math.max(count, 1)) * 2.2;
@@ -131,7 +57,7 @@ function getNodeRadius(node) {
     return node.type === "book" ? getBookRadius(node) : 5.5;
 }
 
-function findNodeAtPosition(x, y) {
+function findNodeAtPosition(state, x, y) {
     for (let i = state.nodes.length - 1; i >= 0; i -= 1) {
         const n = state.nodes[i];
         if (n.x == null || n.y == null) continue;
@@ -143,52 +69,6 @@ function findNodeAtPosition(x, y) {
     return null;
 }
 
-// ========================
-// 加载 runs
-// ========================
-fetch(`${API}/runs`)
-    .then(res => res.json())
-    .then(runs => {
-        runSelect.innerHTML = "";
-
-        runs.forEach(run => {
-            const option = document.createElement("option");
-            option.value = run.id;
-            option.text = `run ${run.id} (${run.book_ids.join(", ")})`;
-            runSelect.appendChild(option);
-        });
-
-        if (runs.length > 0) {
-            loadGraph(runs[0].id);
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        runSelect.innerHTML = "<option>failed to load runs</option>";
-    });
-
-// ========================
-// run 切换
-// ========================
-runSelect.addEventListener("change", () => {
-    loadGraph(runSelect.value);
-});
-
-// ========================
-// 加载 graph
-// ========================
-function loadGraph(runId) {
-    fetch(`${API}/graph?run_id=${runId}`)
-        .then(res => res.json())
-        .then(data => {
-            dispatch({ type: ActionTypes.SET_GRAPH, payload: { graph: data } });
-        })
-        .catch(console.error);
-}
-
-// ========================
-// 构建节点/边
-// ========================
 function buildView(currentState, previousNodes) {
     if (!currentState.graph) {
         return { nodes: [], links: [] };
@@ -293,7 +173,7 @@ function buildView(currentState, previousNodes) {
     return { nodes: nextNodes, links: nextLinks };
 }
 
-function rebuildGraph() {
+function rebuildGraph(state, simulationRef) {
     if (!state.graph) return;
 
     const view = buildView(state, state.nodes);
@@ -317,10 +197,7 @@ function rebuildGraph() {
         );
 }
 
-// ========================
-// 绘制
-// ========================
-function draw() {
+function draw(state, ctx) {
     if (!ctx) return;
     const { nodes, links, transform, hoveredNode, dimensions } = state;
     const t = transform;
@@ -380,75 +257,11 @@ function draw() {
     ctx.restore();
 }
 
-function render() {
-    draw();
-    state.animationFrame = requestAnimationFrame(render);
-}
-
-render();
-
-// ========================
-// 缩放、悬停、双击
-// ========================
-const zoomBehavior = d3
-    .zoom()
-    .scaleExtent([0.2, 5])
-    .filter(event => event.type !== "dblclick")
-    .on("zoom", event => {
-        dispatch({
-            type: ActionTypes.SET_TRANSFORM,
-            payload: { transform: event.transform },
-        });
-    });
-
-d3.select(canvas).call(zoomBehavior);
-
-canvas.addEventListener("mousemove", event => {
-    const rect = canvas.getBoundingClientRect();
-    const x = (event.clientX - rect.left - state.transform.x) / state.transform.k;
-    const y = (event.clientY - rect.top - state.transform.y) / state.transform.k;
-    const hit = findNodeAtPosition(x, y);
-    dispatch({ type: ActionTypes.SET_HOVERED_NODE, payload: { node: hit } });
-    canvas.style.cursor = hit ? "pointer" : "default";
-
-    if (tooltip) {
-        if (hit) {
-            tooltip.style.opacity = "1";
-            tooltip.style.left = `${event.clientX + 12}px`;
-            tooltip.style.top = `${event.clientY + 12}px`;
-            const typeLabel = hit.type === "book" ? "Book" : "Chapter";
-            tooltip.innerHTML = `
-                <div style="font-weight:600;margin-bottom:4px;">${hit.label}</div>
-                <div style="opacity:0.75;">${typeLabel}</div>
-            `;
-            if (hit.type === "book") {
-                tooltip.innerHTML += `<div style="opacity:0.75;">Chapters: ${hit.chapterCount ?? 0}</div>`;
-            } else if (hit.chapterId && hit.chapterId !== hit.label) {
-                tooltip.innerHTML += `<div style="opacity:0.75;">${hit.chapterId}</div>`;
-            }
-        } else {
-            tooltip.style.opacity = "0";
-        }
-    }
-});
-
-canvas.addEventListener("mouseleave", () => {
-    dispatch({ type: ActionTypes.SET_HOVERED_NODE, payload: { node: null } });
-    canvas.style.cursor = "default";
-    if (tooltip) {
-        tooltip.style.opacity = "0";
-    }
-});
-
-canvas.addEventListener("dblclick", event => {
-    const rect = canvas.getBoundingClientRect();
-    const x = (event.clientX - rect.left - state.transform.x) / state.transform.k;
-    const y = (event.clientY - rect.top - state.transform.y) / state.transform.k;
-    const hit = findNodeAtPosition(x, y);
-    if (!hit) return;
-
-    dispatch({
-        type: ActionTypes.TOGGLE_BOOK,
-        payload: { bookId: hit.bookId },
-    });
-});
+export {
+    ActionTypes,
+    reducer,
+    buildView,
+    rebuildGraph,
+    draw,
+    findNodeAtPosition,
+};
