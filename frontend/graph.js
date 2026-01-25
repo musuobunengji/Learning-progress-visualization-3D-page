@@ -9,13 +9,13 @@ const ctx = canvas.getContext("2d");
 const runSelect = document.getElementById("runSelect");
 const themeToggle = document.getElementById("themeToggle");
 const tooltip = document.getElementById("tooltip");
+const simulationRef = { current: null };
 
 const state = {
     graph: null,
     expandedBooks: new Set(),
     nodes: [],
     links: [],
-    simulation: null,
     transform: d3.zoomIdentity,
     hoveredNode: null,
     dimensions: { width: window.innerWidth, height: window.innerHeight },
@@ -32,51 +32,66 @@ const ActionTypes = {
     RESIZE: "RESIZE",
 };
 
-function dispatch(action) {
+function reducer(currentState, action) {
     switch (action.type) {
         case ActionTypes.SET_GRAPH: {
-            state.graph = action.payload.graph;
-            state.expandedBooks.clear();
-            rebuildGraph();
-            break;
+            return {
+                graph: action.payload.graph,
+                expandedBooks: new Set(),
+            };
         }
         case ActionTypes.TOGGLE_BOOK: {
             const bookId = action.payload.bookId;
-            if (state.expandedBooks.has(bookId)) {
-                state.expandedBooks.delete(bookId);
+            const nextExpanded = new Set(currentState.expandedBooks);
+            if (nextExpanded.has(bookId)) {
+                nextExpanded.delete(bookId);
             } else {
-                state.expandedBooks.add(bookId);
+                nextExpanded.add(bookId);
             }
-            rebuildGraph();
-            break;
+            return { expandedBooks: nextExpanded };
         }
         case ActionTypes.SET_HOVERED_NODE: {
-            state.hoveredNode = action.payload.node;
-            break;
+            return { hoveredNode: action.payload.node };
         }
         case ActionTypes.SET_TRANSFORM: {
-            state.transform = action.payload.transform;
-            break;
+            return { transform: action.payload.transform };
         }
         case ActionTypes.SET_THEME: {
-            state.theme = action.payload.theme;
-            document.documentElement.dataset.theme =
-                state.theme === "dark" ? "dark" : "light";
-            if (themeToggle) {
-                themeToggle.textContent =
-                    state.theme === "dark" ? "Theme: Dark" : "Theme: Light";
-            }
-            break;
+            return { theme: action.payload.theme };
         }
         case ActionTypes.RESIZE: {
-            state.dimensions = action.payload.dimensions;
-            canvas.width = state.dimensions.width;
-            canvas.height = state.dimensions.height;
-            rebuildGraph();
-            break;
+            return { dimensions: action.payload.dimensions };
         }
         default:
             console.warn("Unknown action", action);
+            return {};
+    }
+}
+
+function dispatch(action) {
+    const nextPartialState = reducer(state, action);
+    Object.assign(state, nextPartialState);
+
+    if (action.type === ActionTypes.SET_THEME) {
+        document.documentElement.dataset.theme =
+            state.theme === "dark" ? "dark" : "light";
+        if (themeToggle) {
+            themeToggle.textContent =
+                state.theme === "dark" ? "Theme: Dark" : "Theme: Light";
+        }
+    }
+
+    if (action.type === ActionTypes.RESIZE) {
+        canvas.width = state.dimensions.width;
+        canvas.height = state.dimensions.height;
+        rebuildGraph();
+    }
+
+    if (
+        action.type === ActionTypes.SET_GRAPH ||
+        action.type === ActionTypes.TOGGLE_BOOK
+    ) {
+        rebuildGraph();
     }
 }
 
@@ -174,11 +189,13 @@ function loadGraph(runId) {
 // ========================
 // 构建节点/边
 // ========================
-function rebuildGraph() {
-    if (!state.graph) return;
+function buildView(currentState, previousNodes) {
+    if (!currentState.graph) {
+        return { nodes: [], links: [] };
+    }
 
-    const books = state.graph.nodes.filter(n => n.type === "book");
-    const chapters = state.graph.nodes.filter(n => n.type === "chapter");
+    const books = currentState.graph.nodes.filter(n => n.type === "book");
+    const chapters = currentState.graph.nodes.filter(n => n.type === "chapter");
 
     const chapterCountMap = new Map();
     chapters.forEach(c => {
@@ -194,14 +211,14 @@ function rebuildGraph() {
     });
 
     const prevPositions = new Map();
-    state.nodes.forEach(n => {
+    previousNodes.forEach(n => {
         if (n.x != null && n.y != null) {
             prevPositions.set(n.id, { x: n.x, y: n.y, fx: n.fx, fy: n.fy });
         }
     });
 
     const chapterCentroids = new Map();
-    state.nodes.forEach(n => {
+    previousNodes.forEach(n => {
         if (n.type !== "chapter" || n.x == null || n.y == null) return;
         const current = chapterCentroids.get(n.bookId) ?? { x: 0, y: 0, count: 0 };
         chapterCentroids.set(n.bookId, {
@@ -219,13 +236,13 @@ function rebuildGraph() {
         const color = bookColorMap.get(book.id);
         const bookKey = `book-${book.id}`;
 
-        if (state.expandedBooks.has(book.id)) {
+        if (currentState.expandedBooks.has(book.id)) {
             const base = prevPositions.get(bookKey);
             const centroid = chapterCentroids.get(book.id);
             const bx = base?.x ??
-                (centroid ? centroid.x / centroid.count : state.dimensions.width / 2);
+                (centroid ? centroid.x / centroid.count : currentState.dimensions.width / 2);
             const by = base?.y ??
-                (centroid ? centroid.y / centroid.count : state.dimensions.height / 2);
+                (centroid ? centroid.y / centroid.count : currentState.dimensions.height / 2);
 
             const bookChapters = chapters.filter(c => c.book_id === book.id);
             bookChapters.forEach((c, i) => {
@@ -265,7 +282,7 @@ function rebuildGraph() {
         }
     });
 
-    state.graph.edges.forEach(e => {
+    currentState.graph.edges.forEach(e => {
         const s = `chapter-${e.source}`;
         const t = `chapter-${e.target}`;
         if (visibleChapterIds.has(s) && visibleChapterIds.has(t)) {
@@ -273,11 +290,18 @@ function rebuildGraph() {
         }
     });
 
-    state.nodes = nextNodes;
-    state.links = nextLinks;
+    return { nodes: nextNodes, links: nextLinks };
+}
 
-    if (state.simulation) state.simulation.stop();
-    state.simulation = d3
+function rebuildGraph() {
+    if (!state.graph) return;
+
+    const view = buildView(state, state.nodes);
+    state.nodes = view.nodes;
+    state.links = view.links;
+
+    if (simulationRef.current) simulationRef.current.stop();
+    simulationRef.current = d3
         .forceSimulation(state.nodes)
         .force(
             "link",
